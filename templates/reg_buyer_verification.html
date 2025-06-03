@@ -1,0 +1,144 @@
+{% extends "base_form.html" %}
+
+{% block title %}Register - Email Verification{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a1a1a;
+        --primary-hover: #2d2d2d;
+    }
+
+    .page-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .form-container {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-container h2 {
+        color: var(--primary-color);
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e1e1e1;
+        background-color: #f8f9ff;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+        background-color: #fff;
+    }
+
+    .btn-dark {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-dark:hover {
+        background-color: var(--primary-hover);
+        border-color: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    .text-dark {
+        color: var(--primary-color) !important;
+    }
+
+    .exit-icon {
+        transition: all 0.3s ease;
+        color: var(--primary-color);
+    }
+
+    .exit-icon:hover {
+        opacity: 0.7;
+    }
+
+    .step-indicator {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .resend-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .resend-link:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+    }
+</style>
+
+<div class="page-container">
+    <div class="form-container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2>Register</h2>
+            <a href="{{ url_for('buyer_registration.get_login_info') }}" class="exit-icon">
+                <i class="bi bi-arrow-left fs-4"></i>
+            </a>
+        </div>
+
+        <p class="mb-4">
+            <span class="step-indicator">Verification:</span>
+            A One-Time-Password (OTP) has been sent to <strong>{{ session.get('contact_info')['email'] }}</strong>. Please check your inbox or spam/junk folder. You will need to enter it below to verify your account.
+        </p>
+
+        <!-- Message Box -->
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div class="alert-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %} 
+
+        <form action="{{ url_for('buyer_registration.get_verification') }}" method="POST">
+            <div class="mb-4">
+                <label for="otp" class="form-label">OTP Code *</label>
+                <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter OTP" oninput="numbers_only_limit6(this)" required>
+            </div>
+
+            <button type="submit" class="btn btn-dark w-100 mb-4">Confirm</button>
+        </form>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="mb-0">Didn't receive OTP?</p>
+            <a href="{{ url_for('buyer_registration.resend_registration_otp') }}" class="resend-link">Resend OTP</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,630 @@
+{% extends "admin_dashboard.html" %}
+
+<!-- Webpage Title -->
+{% block title %}Seller Management{% endblock %}
+
+<!-- Admin Content -->
+{% block admin_content %}
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/user_mgmt.js') }}"></script>
+
+<!-- MAIN -->
+<div class="main">
+
+   <!-- Top Bar -->
+   <nav class="navbar navbar-expand d-flex align-items-center justify-content-between w-100">
+      
+      <!-- MediBook Logo -->
+      <div class="d-flex align-items-center">
+         <button class="toggler-btn" type="button">
+            <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="Menu" style="width: 25px; height: 20px;">
+         </button>
+         <a class="navbar-brand ms-3" href="#">
+            <img src="{{ url_for('static', filename='img/logo/logo_dark.svg') }}" alt="MediBook Logo" width="150">
+        </a>
+      </div>
+
+      <!-- Search Bar for Desktop -->
+      <form class="d-flex justify-content-end d-none d-md-flex" role="search" method="GET" action="{{ url_for('admin_user_mgmt.seller_mgmt') }}">
+         <input type="hidden" name="status" value="{{ selected_status }}">
+         <input type="hidden" name="sort_by" value="{{ sort_by }}">
+         <input type="hidden" name="order" value="{{ order }}">
+         <div class="input-group">
+            <input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Search sellers..." aria-label="Search">
+            <button class="btn btn-primary" type="submit">
+               <img src="{{ url_for('static', filename='img/icons/search.png') }}" alt="Search" width="20">
+            </button>
+         </div>
+      </form>
+
+      <!-- Mobile Search Button -->
+      <button class="btn btn-primary d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
+         <img src="{{ url_for('static', filename='img/icons/search.png') }}" alt="Search" width="20">
+      </button>
+   </nav>
+   <!-- Top Bar End -->
+
+   <!-- Mobile Search Offcanvas -->
+   <div class="offcanvas offcanvas-top" id="searchOffcanvas" tabindex="-1">
+      <div class="offcanvas-header">
+         <h5 class="offcanvas-title">Search Sellers</h5>
+         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+         <form role="search" method="GET" action="{{ url_for('admin_user_mgmt.seller_mgmt') }}">
+            <input type="hidden" name="status" value="{{ selected_status }}">
+            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+            <input type="hidden" name="order" value="{{ order }}">
+            <div class="input-group">
+               <input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Search sellers...">
+               <button class="btn btn-primary" type="submit">
+                  <img src="{{ url_for('static', filename='img/icons/search.png') }}" alt="Search" width="20">
+               </button>
+            </div>
+         </form>
+      </div>
+   </div>
+   <!-- Search for Mobile End -->
+
+   <!-- MAIN CONTENT -->
+   <main class="content px-4 py-3">
+      
+      <!-- Title Section Bar -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+         
+         <!-- Title Bar -->
+         <div>
+            <h4 class="mb-1">Seller Management</h4>
+            <p class="text-muted mb-0">Manage and monitor all seller accounts</p>
+         </div>
+         
+         <!-- Buttons -->
+         <div class="d-flex flex-wrap gap-2">
+            <!-- Sort Dropdown -->
+            <div class="dropdown">
+               <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-sort-down me-1"></i> Sort
+               </button>
+               <ul class="dropdown-menu">
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'date_created' and order == 'DESC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', sort_by='date_created', order='DESC', status=selected_status, search=search) }}">
+                        Recent
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'date_created' and order == 'ASC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', sort_by='date_created', order='ASC', status=selected_status, search=search) }}">
+                        Oldest
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'firstname' and order == 'ASC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', sort_by='firstname', order='ASC', status=selected_status, search=search) }}">
+                        Name (A-Z)
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'firstname' and order == 'DESC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', sort_by='firstname', order='DESC', status=selected_status, search=search) }}">
+                        Name (Z-A)
+                     </a>
+                  </li>
+               </ul>
+            </div>
+
+            <!-- Filter Dropdown -->
+            <div class="dropdown">
+               <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-funnel me-1"></i> Filter
+               </button>
+               <ul class="dropdown-menu">
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Approved' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', status='Approved', sort_by=sort_by, order=order, search=search) }}">
+                        Active Sellers
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Pending' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', status='Pending', sort_by=sort_by, order=order, search=search) }}">
+                        Pending Approval
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Archived' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', status='Archived', sort_by=sort_by, order=order, search=search) }}">
+                        Archived Sellers
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Banned' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', status='Banned', sort_by=sort_by, order=order, search=search) }}">
+                        Banned Sellers
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Suspended' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.seller_mgmt', status='Suspended', sort_by=sort_by, order=order, search=search) }}">
+                        Suspended Sellers
+                     </a>
+                  </li>
+               </ul>
+            </div>
+
+            <!-- Reset Button -->
+            <a href="{{ url_for('admin_user_mgmt.seller_mgmt') }}" class="btn btn-outline-primary">
+               <i class="bi bi-arrow-clockwise"></i>
+            </a>
+         </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="row g-3 mb-4">
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-shop fs-4 text-success"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Total Sellers</p>
+                        <h4 class="mb-0">{{ stats.total_sellers }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-shop-window fs-4 text-success"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Active Sellers</p>
+                        <h4 class="mb-0">{{ stats.active_sellers }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-shop-window fs-4 text-warning"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Pending Sellers</p>
+                        <h4 class="mb-0">{{ stats.pending_sellers }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-shop-window fs-4 text-danger"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Suspended/Banned</p>
+                        <h4 class="mb-0">{{ stats.suspended_banned_sellers }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Alert Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+         {% if messages %}
+            {% for category, message in messages %}
+               <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+               </div>
+            {% endfor %}
+         {% endif %}
+      {% endwith %}
+
+      <!-- Sellers Table -->
+      <div class="card border-0 shadow-sm">
+         <div class="card-body p-0">
+            <div class="table-responsive">
+               <table class="table table-hover mb-0">
+                  <thead class="bg-primary text-white">
+                     <tr>
+                        <th scope="col" width="40">
+                           <div class="form-check">
+                              <input class="form-check-input" type="checkbox" id="selectAll">
+                           </div>
+                        </th>
+                        <th scope="col">#</th>
+                        <th scope="col">Seller</th>
+                        <th scope="col">Store</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Joined Date</th>
+                        <th scope="col" width="100">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody class="align-middle">
+                     {% if sellers %}
+                        {% for seller in sellers %}
+                        <tr>
+                           <td>
+                              <div class="form-check">
+                                 <input class="form-check-input" type="checkbox" name="selected_sellers" value="{{ seller.id }}">
+                              </div>
+                           </td>
+                           <td>{{ loop.index }}</td>
+                           <td>
+                              <div class="d-flex align-items-center">
+                                 {% if seller.profile_pic %}
+                                    <img src="{{ url_for('admin_user_mgmt.serve_seller_profile_pic', filename=seller.profile_pic) }}" 
+                                         class="rounded-circle me-2" width="40" height="40" alt="Profile Picture">
+                                 {% else %}
+                                    <img src="{{ url_for('static', filename='img/profile/default_profile.png') }}" 
+                                         class="rounded-circle me-2" width="40" height="40" alt="Default Profile">
+                                 {% endif %}
+                                 <div>
+                                    <h6 class="mb-0">{{ seller.firstname }} {{ seller.lastname }}</h6>
+                                    <small class="text-muted">{{ seller.email }}</small>
+                                 </div>
+                              </div>
+                           </td>
+                           <td>
+                              <div>
+                                 <h6 class="mb-0">{{ seller.store_name }}</h6>
+                                 <small class="text-muted">{{ seller.store_type }}</small>
+                              </div>
+                           </td>
+                           <td>
+                              <div>
+                                 <div class="mb-1">
+                                    <i class="bi bi-telephone me-1"></i>
+                                    {{ seller.phone }}
+                                 </div>
+                                 <small class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    {{ seller.city }}, {{ seller.province }}
+                                 </small>
+                              </div>
+                           </td>
+                           <td>
+                              <span class="badge {% if seller.status == 'Approved' %}bg-success
+                                    {% elif seller.status == 'Pending' %}bg-warning
+                                    {% elif seller.status == 'Archived' %}bg-secondary
+                                    {% elif seller.status == 'Banned' %}bg-danger
+                                    {% elif seller.status == 'Suspended' %}bg-warning
+                                    {% else %}bg-dark{% endif %}">
+                                 {{ seller.status }}
+                              </span>
+                           </td>
+                           <td>{{ seller.date_created.strftime('%b %d, %Y') }}</td>
+                           <td>
+                              <div class="dropdown">
+                                 <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                 </button>
+                                 <ul class="dropdown-menu">
+                                    <li>
+                                       <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#sellerDetailsModal{{ seller.id }}">
+                                          <i class="bi bi-eye me-2"></i>View Details
+                                       </button>
+                                    </li>
+                                    {% if seller.status == 'Pending' %}
+                                       <li>
+                                          <button type="button" class="dropdown-item text-success" onclick="updateSellerStatus('{{ seller.id }}', 'Approved')">
+                                             <i class="bi bi-check-circle me-2"></i>Approve
+                                          </button>
+                                       </li>
+                                    {% elif seller.status == 'Approved' %}
+                                       <li>
+                                          <button type="button" class="dropdown-item" onclick="updateSellerStatus('{{ seller.id }}', 'Archived')">
+                                             <i class="bi bi-archive me-2"></i>Archive
+                                          </button>
+                                       </li>
+                                       <li>
+                                          <button type="button" class="dropdown-item" onclick="updateSellerStatus('{{ seller.id }}', 'Suspended')">
+                                             <i class="bi bi-pause-circle me-2"></i>Suspend
+                                          </button>
+                                       </li>
+                                       <li>
+                                          <button type="button" class="dropdown-item text-danger" onclick="updateSellerStatus('{{ seller.id }}', 'Banned')">
+                                             <i class="bi bi-x-circle me-2"></i>Ban
+                                          </button>
+                                       </li>
+                                    {% else %}
+                                       <li>
+                                          <button type="button" class="dropdown-item text-success" onclick="updateSellerStatus('{{ seller.id }}', 'Approved')">
+                                             <i class="bi bi-check-circle me-2"></i>Activate
+                                          </button>
+                                       </li>
+                                    {% endif %}
+                                 </ul>
+                              </div>
+                           </td>
+                        </tr>
+
+                        <!-- Seller Details Modal -->
+                        <div class="modal fade" id="sellerDetailsModal{{ seller.id }}" tabindex="-1">
+                           <div class="modal-dialog modal-lg modal-dialog-centered">
+                              <div class="modal-content">
+                                 <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">Seller Details</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                 </div>
+                                 <div class="modal-body">
+                                    <div class="row g-4">
+                                       <!-- Profile Section -->
+                                       <div class="col-md-4 text-center">
+                                          {% if seller.profile_pic %}
+                                             <img src="{{ url_for('admin_user_mgmt.serve_seller_profile_pic', filename=seller.profile_pic) }}" 
+                                                  class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+                                          {% else %}
+                                             <img src="{{ url_for('static', filename='img/profile/default_profile.png') }}" 
+                                                  class="rounded-circle mb-3" width="120" height="120" alt="Default Profile">
+                                          {% endif %}
+                                          <h5 class="mb-1">{{ seller.firstname }} {{ seller.lastname }}</h5>
+                                          <span class="badge {% if seller.status == 'Approved' %}bg-success
+                                                {% elif seller.status == 'Pending' %}bg-warning
+                                                {% elif seller.status == 'Archived' %}bg-secondary
+                                                {% elif seller.status == 'Banned' %}bg-danger
+                                                {% elif seller.status == 'Suspended' %}bg-warning
+                                                {% else %}bg-dark{% endif %}">
+                                             {{ seller.status }}
+                                          </span>
+                                       </div>
+                                       
+                                       <!-- Store Details Section -->
+                                       <div class="col-md-8">
+                                          <h6 class="border-bottom pb-2">Store Information</h6>
+                                          <div class="row g-3">
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">Store Name</p>
+                                                <p class="mb-3">{{ seller.store_name }}</p>
+                                                
+                                                <p class="mb-1 text-muted">Store Type</p>
+                                                <p class="mb-3">{{ seller.store_type }}</p>
+                                             </div>
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">Business Permit</p>
+                                                <p class="mb-3">{{ seller.business_permit }}</p>
+                                                
+                                                <p class="mb-1 text-muted">DTI Registration</p>
+                                                <p class="mb-3">{{ seller.dti_registration }}</p>
+                                             </div>
+                                          </div>
+
+                                          <h6 class="border-bottom pb-2 mt-4">Contact Information</h6>
+                                          <div class="row g-3">
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">Email</p>
+                                                <p class="mb-3">{{ seller.email }}</p>
+                                                
+                                                <p class="mb-1 text-muted">Phone</p>
+                                                <p class="mb-3">{{ seller.phone }}</p>
+                                             </div>
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">Address</p>
+                                                <p class="mb-3">
+                                                   {{ seller.house_no }} {{ seller.street }}<br>
+                                                   {{ seller.barangay }}, {{ seller.city }}<br>
+                                                   {{ seller.province }}
+                                                </p>
+                                             </div>
+                                          </div>
+                                       </div>
+
+                                       <!-- Documents Section -->
+                                       <div class="col-12">
+                                          <h6 class="border-bottom pb-2">Business Documents</h6>
+                                          <div class="row g-3">
+                                             <!-- Business Permit -->
+                                             <div class="col-md-6">
+                                                <p class="mb-2 text-muted">Business Permit</p>
+                                                {% if seller.permit_pic %}
+                                                   <img src="{{ url_for('admin_user_mgmt.serve_seller_permit_pic', filename=seller.permit_pic) }}" 
+                                                        class="img-fluid rounded" alt="Business Permit">
+                                                {% else %}
+                                                   <div class="alert alert-warning mb-0">
+                                                      No business permit uploaded
+                                                   </div>
+                                                {% endif %}
+                                             </div>
+                                             <!-- DTI Registration -->
+                                             <div class="col-md-6">
+                                                <p class="mb-2 text-muted">DTI Registration</p>
+                                                {% if seller.dti_registration_pic %}
+                                                   <img src="{{ url_for('admin_user_mgmt.serve_seller_id_pic', filename=seller.dti_registration_pic) }}" 
+                                                        class="img-fluid rounded" alt="DTI Registration">
+                                                {% else %}
+                                                   <div class="alert alert-warning mb-0">
+                                                      No DTI registration uploaded
+                                                   </div>
+                                                {% endif %}
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        {% endfor %}
+                     {% else %}
+                        <tr>
+                           <td colspan="8" class="text-center py-4">
+                              <div class="text-muted">
+                                 <i class="bi bi-shop display-4 d-block mb-3"></i>
+                                 <h5>No Sellers Found</h5>
+                                 <p class="mb-0">There are no sellers matching your search criteria.</p>
+                              </div>
+                           </td>
+                        </tr>
+                     {% endif %}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <nav class="mt-4">
+         <ul class="pagination justify-content-center">
+            <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+               <a class="page-link" href="{{ url_for('admin_user_mgmt.seller_mgmt', page=current_page-1, status=selected_status, sort_by=sort_by, order=order, search=search) }}">Previous</a>
+            </li>
+            {% for page in range(1, total_pages + 1) %}
+            <li class="page-item {% if page == current_page %}active{% endif %}">
+               <a class="page-link" href="{{ url_for('admin_user_mgmt.seller_mgmt', page=page, status=selected_status, sort_by=sort_by, order=order, search=search) }}">{{ page }}</a>
+            </li>
+            {% endfor %}
+            <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+               <a class="page-link" href="{{ url_for('admin_user_mgmt.seller_mgmt', page=current_page+1, status=selected_status, sort_by=sort_by, order=order, search=search) }}">Next</a>
+            </li>
+         </ul>
+      </nav>
+      {% endif %}
+   </main>
+   <!-- MAIN CONTENT END -->
+  
+</div>
+<!-- MAIN END -->
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1">
+   <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+         <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Confirm Status Update</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+         </div>
+         <div class="modal-body">
+            <p>Are you sure you want to update the status of this seller?</p>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Update</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<style>
+/* Custom styles for seller management */
+.card {
+   transition: transform 0.2s ease;
+}
+
+.card:hover {
+   transform: translateY(-2px);
+}
+
+.table th {
+   font-weight: 500;
+   color: white !important;
+}
+
+.table thead {
+   background-color: var(--bs-primary);
+}
+
+.table td {
+   vertical-align: middle;
+}
+
+.dropdown-menu {
+   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+   font-weight: 500;
+   padding: 0.5em 0.75em;
+}
+
+.modal-header {
+   border-bottom: none;
+}
+
+.modal-footer {
+   border-top: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+   .title-container {
+      text-align: center;
+   }
+   
+   .btn-container {
+      justify-content: center;
+   }
+}
+</style>
+
+<script>
+// Handle bulk selection
+document.getElementById('selectAll').addEventListener('change', function() {
+   document.querySelectorAll('input[name="selected_sellers"]').forEach(checkbox => {
+      checkbox.checked = this.checked;
+   });
+});
+
+// Handle status updates
+function updateSellerStatus(sellerId, status) {
+   const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+   const confirmBtn = document.getElementById('confirmStatusUpdate');
+   
+   confirmBtn.onclick = function() {
+      fetch('/admin/seller/update-status', {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+            seller_id: sellerId,
+            status: status
+         })
+      })
+      .then(response => response.json())
+      .then(data => {
+         if (data.success) {
+            location.reload();
+         } else {
+            alert('Failed to update status: ' + data.message);
+         }
+      })
+      .catch(error => {
+         console.error('Error:', error);
+         alert('An error occurred while updating the status');
+      });
+      
+      modal.hide();
+   };
+   
+   modal.show();
+}
+</script>
+
+{% endblock %}
+<!-- Admin Content End-->

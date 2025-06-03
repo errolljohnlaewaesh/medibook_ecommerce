@@ -1,0 +1,415 @@
+{% extends "buyer_homepage.html" %}
+
+{% block title %}{{ products[0]['product_name'] }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/buyer_categories.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/product_show.css') }}">
+
+<style>
+/* Dark theme styles */
+.product-container {
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 1rem auto;
+    max-width: 1400px;
+}
+
+.product-images-container {
+    position: relative;
+    position: sticky;
+    top: 20px;
+}
+
+.product-images img {
+    width: 100%;
+    height: 400px;
+    object-fit: contain;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.thumbnail {
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.thumbnail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-details {
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.product-description {
+    padding: 1rem;
+}
+
+.txt-product-name {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #212529;
+}
+
+.txt-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #212529;
+    margin-bottom: 1rem;
+}
+
+.stars {
+    color: #212529;
+}
+
+.btn-dark {
+    background-color: #212529;
+    border-color: #212529;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.btn-dark:hover {
+    background-color: #1a1e21;
+    border-color: #1a1e21;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-outline-dark {
+    color: #212529;
+    border-color: #212529;
+    background-color: transparent;
+}
+
+.btn-outline-dark:hover {
+    color: #fff;
+    background-color: #212529;
+    border-color: #212529;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quantity-control .btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-input {
+    width: 80px;
+    text-align: center;
+    font-size: 1.1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.shop-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.related-products {
+    margin-top: 3rem;
+}
+
+.description-content {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #495057;
+    text-align: justify;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 40px;
+    height: 40px;
+    background: #212529;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.8;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 1;
+}
+</style>
+
+<!-- Breadcrumb -->
+<div class="container-fluid py-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('buyer_homepage.show_buyer_homepage') }}" class="text-dark">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('buyer_categories.category_page', category=products[0]['product_category'].lower().replace(' ', '_')) }}" class="text-dark">{{ products[0]['product_category'] }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ products[0]['product_name'] }}</li>
+        </ol>
+    </nav>
+</div>
+
+<!-- Main Product Section -->
+<div class="product-container">
+    <div class="row">
+        <!-- Product Images (Left) -->
+        <div class="col-md-5">
+            <div class="product-images-container">
+                <!-- Main Image -->
+                <div class="product-images mb-3">
+                    {% if products[0]['product_main_pic'] %}
+                        <img src="{{ url_for('seller_inventory.serve_product_main_pic', filename=products[0]['product_main_pic']) }}" 
+                             alt="{{ products[0]['product_name'] }}" 
+                             id="main-product-image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/placeholder/product_placeholder.png') }}" 
+                             alt="No Image Available" 
+                             id="main-product-image">
+                    {% endif %}
+                    
+                    <!-- Wishlist Button -->
+                    <div class="position-absolute top-0 end-0 p-3">
+                        <form action="{{ url_for('buyer_product.' + ('unlike' if like_status else 'like') + '_product', product_info_id=products[0]['product_info_id']) }}" 
+                              method="POST">
+                            <button type="submit" class="btn btn-light rounded-circle shadow-sm">
+                                <i class="bi bi-heart{{ '-fill' if like_status else '' }} text-dark fs-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Images -->
+                <div class="row g-2">
+                    <!-- Main Image Thumbnail -->
+                    <div class="col-3">
+                        {% if products[0]['product_main_pic'] %}
+                            <img src="{{ url_for('seller_inventory.serve_product_main_pic', filename=products[0]['product_main_pic']) }}" 
+                                 class="thumbnail w-100"
+                                 alt="Main Image">
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Additional Images -->
+                    {% for image in images[:3] %}
+                    <div class="col-3">
+                        <img src="{{ url_for('seller_inventory.serve_product_image', filename=image['product_image']) }}" 
+                             class="thumbnail w-100"
+                             alt="Product Image">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details and Description (Right) -->
+        <div class="col-md-7">
+            <!-- Product Details Section -->
+            <div class="product-details">
+                <h1 class="txt-product-name">{{ products[0]['product_name'] }}</h1>
+
+                <!-- Rating -->
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="stars">
+                        {% set rounded_rating = average_rating|default(0)|round(0, 'floor') %}
+                        {% for i in range(5) %}
+                            <i class="bi bi-star{{ '-fill' if i < rounded_rating else '' }}"></i>
+                        {% endfor %}
+                    </div>
+                    <span class="fs-5">{{ average_rating|default(0) }}</span>
+                    <span class="text-muted">({{ total_ratings|default(0) }} reviews)</span>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-4">
+                    <h2 class="txt-price mb-2">₱{{ "{:,.2f}".format(products[0]['price']) }}</h2>
+                    <p class="text-muted">Shipping Fee: ₱{{ "{:,.2f}".format(products[0]['shipping_fee']) }}</p>
+                </div>
+
+                <!-- Stock -->
+                <div class="mb-4">
+                    <p class="mb-2">
+                        <span class="text-muted">Available Stock:</span>
+                        <span class="fw-bold text-dark">{{ products[0]['stock'] }} items</span>
+                    </p>
+                </div>
+
+                <!-- Add to Cart Form -->
+                <form action="{{ url_for('buyer_product.add_to_cart') }}" method="POST" class="mt-4">
+                    <input type="hidden" name="product_info_id" value="{{ products[0]['product_info_id'] }}">
+                    
+                    <!-- Quantity -->
+                    <div class="mb-4">
+                        <label class="form-label text-muted">Quantity</label>
+                        <div class="quantity-control">
+                            <button type="button" class="btn btn-dark" id="decrease-quantity">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="number" 
+                                   id="product-quantity" 
+                                   name="quantity" 
+                                   class="quantity-input" 
+                                   value="1" 
+                                   min="1" 
+                                   max="{{ products[0]['stock'] }}" 
+                                   readonly>
+                            <button type="button" class="btn btn-dark" id="increase-quantity">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <button type="submit" class="btn btn-dark btn-lg w-100 mb-3">
+                        <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                    </button>
+                </form>
+            </div>
+
+            <!-- Product Description Section -->
+            <div class="product-description">
+                <h4 class="mb-4">Product Description</h4>
+                <div class="description-content">
+                    {{ products[0]['product_description'] | replace('\n', '<br>') | safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shop Section -->
+<div class="shop-section container-fluid">
+    <div class="d-flex align-items-center gap-4 mb-4">
+        <div class="shop-image">
+            {% if products[0]['shop_pic'] %}
+                <img src="{{ url_for('seller_shop_profile.serve_shop_pic', filename=products[0]['shop_pic']) }}" 
+                     class="rounded-circle" 
+                     style="width: 80px; height: 80px; object-fit: cover;"
+                     alt="{{ products[0]['shop_name'] }}">
+            {% else %}
+                <img src="{{ url_for('static', filename='img/placeholder/shop_placeholder.png') }}" 
+                     class="rounded-circle" 
+                     style="width: 80px; height: 80px; object-fit: cover;"
+                     alt="Shop Image">
+            {% endif %}
+        </div>
+        <div>
+            <h4 class="mb-1">{{ products[0]['shop_name'] }}</h4>
+            <p class="text-muted mb-0">{{ products[0]['seller_name'] }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- More Products Section -->
+{% if shop_products %}
+<div class="related-products container-fluid">
+    <h4 class="mb-4">More from {{ products[0]['shop_name'] }}</h4>
+    <div class="row row-cols-2 row-cols-md-4 g-4">
+        {% for product in shop_products %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <!-- Product Image -->
+                <div class="position-relative">
+                    <a href="{{ url_for('buyer_product.product_page', product_info_id=product['product_info_id']) }}">
+                        {% if product['product_main_pic'] %}
+                            <img src="{{ url_for('seller_inventory.serve_product_main_pic', filename=product['product_main_pic']) }}" 
+                                 class="card-img-top" 
+                                 style="height: 200px; object-fit: cover;"
+                                 alt="{{ product['product_name'] }}">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-image text-muted fs-1"></i>
+                            </div>
+                        {% endif %}
+                    </a>
+                    
+                    <!-- Wishlist Button -->
+                    <form method="POST" 
+                          action="{{ url_for('buyer_categories.toggle_like_product', product_info_id=product['product_info_id']) }}"
+                          class="position-absolute top-0 end-0 p-2">
+                        <button type="submit" class="btn btn-light rounded-circle">
+                            <i class="bi bi-heart{{ '-fill' if product.liked else '' }} text-dark"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Product Info -->
+                <div class="card-body">
+                    <h5 class="card-title text-truncate">{{ product['product_name'] }}</h5>
+                    <p class="card-text fw-bold mb-2">₱{{ "{:,.2f}".format(product['min_price']) }}</p>
+                    
+                    <!-- Rating -->
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="stars">
+                            {% set rating = product.get('Average_Rating', 0) %}
+                            {% for i in range(5) %}
+                                <i class="bi bi-star{{ '-fill' if i < rating|round(0) else '' }} text-dark"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted small">{{ "{:.1f}".format(rating) }}</span>
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <a href="{{ url_for('buyer_product.product_page', product_info_id=product['product_info_id']) }}" 
+                       class="btn btn-dark w-100">
+                        <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Thumbnail click handling
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const mainImage = document.getElementById('main-product-image');
+    
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            mainImage.src = this.src;
+        });
+    });
+
+    // Quantity controls
+    const quantityInput = document.getElementById('product-quantity');
+    const maxStock = parseInt('{{ products[0]["stock"] }}');
+
+    document.getElementById("increase-quantity").addEventListener("click", function() {
+        let currentValue = parseInt(quantityInput.value);
+        if (currentValue < maxStock) {
+            quantityInput.value = currentValue + 1;
+        }
+    });
+
+    document.getElementById("decrease-quantity").addEventListener("click", function() {
+        let currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+        }
+    });
+});
+</script>
+
+{% endblock %}

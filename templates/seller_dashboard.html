@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{% block title %}Seller Dashboard{% endblock %}</title>
+
+   <!-- FAVICON -->
+   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo/favicon.svg') }}">
+
+   <!-- BOOTSTRAP LINKS -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+   
+   <!-- CHART.JS -->
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   
+   <!-- OUTFIT FONT -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+   <!-- INTER FONT -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+   
+   <!-- CUSTOM CSS -->
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/seller.css') }}">
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+
+<style>
+:root {
+    --dark-primary: #212529;
+    --dark-secondary: #343a40;
+    --dark-success: #198754;
+    --dark-info: #0dcaf0;
+    --dark-warning: #ffc107;
+    --dark-danger: #dc3545;
+    --dark-light: #110f0f;
+    --dark-border: rgba(255,255,255,0.1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Updated Sidebar Styles */
+.sidebar {
+    width: 280px;
+    background: #fff;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+.sidebar-logo {
+    padding: 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-logo img {
+    height: 35px;
+}
+
+.sidebar-nav {
+    padding: 1rem;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #212529;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(33, 37, 41, 0.08);
+    color: #212529;
+    text-decoration: none;
+}
+
+.sidebar-link.active {
+    background-color: #212529;
+    color: #fff;
+}
+
+.sidebar-link.active i {
+    color: #fff;
+}
+
+.sidebar-link i {
+    font-size: 1.25rem;
+    margin-right: 1rem;
+    width: 24px;
+    text-align: center;
+    color: #212529;
+}
+
+.sidebar-link span {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #212529;
+}
+
+.sidebar-link:hover i,
+.sidebar-link:hover span {
+    color: #212529;
+}
+
+/* Updated Layout Styles */
+.main {
+    margin-left: 280px;
+    margin-top: 70px;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 70px);
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-left {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stats-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chart-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tables-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 1400px) {
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .stats-left {
+        grid-template-columns: 1fr;
+    }
+    
+    .tables-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Navbar Styles */
+.navbar {
+    background: #fff;
+    padding: 1rem 2rem;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 260px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 998;
+}
+
+.navbar .navbar-brand {
+    margin-right: 2rem;
+}
+
+.navbar .search-form {
+    max-width: 500px;
+    width: 100%;
+}
+
+.navbar .search-form .form-control {
+    border: 1px solid #e9ecef;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 8px 0 0 8px;
+    background: #f8f9fa;
+}
+
+.navbar .search-form .btn {
+    padding: 0.6rem 1.2rem;
+    background: #212529;
+    border-color: #212529;
+    border-radius: 0 8px 8px 0;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background-color: var(--dark-primary);
+    color: #fff;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+.stat-card {
+    background: var(--dark-primary);
+    color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.stat-card i {
+    font-size: 2rem;
+    opacity: 0.8;
+}
+
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+/* Button Styles */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-dark {
+    background-color: var(--dark-primary);
+    border-color: var(--dark-primary);
+}
+
+.btn-dark:hover {
+    background-color: var(--dark-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Chart Styles */
+#salesChart {
+    min-height: 300px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.collapsed {
+        transform: translateX(0);
+        width: 280px;
+    }
+    
+    .main {
+        margin-left: 0 !important;
+    }
+    
+    .stat-card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+</head>
+
+<body>
+  
+   <div class="d-flex">
+
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar">
+         <div class="sidebar-logo">
+            <img src="{{ url_for('static', filename='img/logo/logo_dark.svg') }}" alt="MediBook Logo">
+         </div>
+
+         <div class="sidebar-nav">
+            <div class="sidebar-header">General</div>
+            
+            <a href="{{ url_for('seller_dashboard.dashboard')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_dashboard.dashboard') %}active{% endif %}">
+               <i class="bi bi-grid-1x2-fill"></i>
+               <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('seller_shop_profile.shop_profile')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_shop_profile.shop_profile') %}active{% endif %}">
+               <i class="bi bi-shop"></i>
+               <span>Shop Profile</span>
+            </a>
+
+            <a href="{{ url_for('seller_inventory.inventory')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_inventory.inventory') %}active{% endif %}">
+               <i class="bi bi-box-seam"></i>
+               <span>Inventory</span>
+            </a>
+
+            <a href="{{ url_for('seller_orders.orders')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_orders.orders') %}active{% endif %}">
+               <i class="bi bi-cart"></i>
+               <span>Orders</span>
+            </a>
+
+            <a href="{{ url_for('seller_finance.finance')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_finance.finance') %}active{% endif %}">
+               <i class="bi bi-wallet2"></i>
+               <span>Finance</span>
+            </a>
+
+            <a href="{{ url_for('seller_notifications.notifications')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_notifications.notifications') %}active{% endif %}">
+               <div class="d-flex align-items-center justify-content-between w-100">
+                  <div class="d-flex align-items-center">
+                     <i class="bi bi-bell"></i>
+                     <span>Notifications</span>
+                  </div>
+                  <span id="notificationBadge" class="badge bg-danger d-none">0</span>
+               </div>
+            </a>
+
+            <div class="sidebar-header">Account</div>
+
+            <a href="{{ url_for('seller_settings.settings')}}" 
+               class="sidebar-link {% if request.path == url_for('seller_settings.settings') %}active{% endif %}">
+               <i class="bi bi-gear"></i>
+               <span>Settings</span>
+            </a>
+
+            <a href="{{ url_for('login.logout')}}" class="sidebar-link">
+               <i class="bi bi-box-arrow-right"></i>
+               <span>Log Out</span>
+            </a>
+         </div>
+      </aside>
+
+      <!-- Main -->
+      {% block seller_content %}
+         <div class="main">
+            <nav class="navbar">
+               <div class="d-flex align-items-center">
+                  <button class="btn btn-link text-dark p-0 me-3" type="button">
+                     <i class="bi bi-list fs-4"></i>
+                  </button>
+                  <a class="navbar-brand" href="#">
+                     <img src="{{ url_for('static', filename='img/logo/logo_dark.svg') }}" alt="MediBook Logo" height="30">
+                  </a>
+               </div>
+
+               <!-- Search Form -->
+               <form class="search-form ms-auto d-none d-md-flex">
+                  <div class="input-group">
+                     <input type="search" class="form-control" placeholder="Search products...">
+                     <button class="btn btn-dark" type="submit">
+                        <i class="bi bi-search"></i>
+                     </button>
+                  </div>
+               </form>
+
+               <!-- Mobile Search Button -->
+               <button class="btn btn-dark d-md-none ms-auto" type="button" data-bs-toggle="offcanvas" 
+                       data-bs-target="#searchOffcanvas">
+                  <i class="bi bi-search"></i>
+               </button>
+            </nav>
+
+            <!-- Mobile Search Offcanvas -->
+            <div class="offcanvas offcanvas-top" id="searchOffcanvas" tabindex="-1">
+               <div class="offcanvas-header">
+                  <h5 class="offcanvas-title">Search</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+               </div>
+               <div class="offcanvas-body">
+                  <form class="d-flex">
+                     <div class="input-group">
+                        <input type="search" class="form-control" placeholder="Search products...">
+                        <button class="btn btn-dark" type="submit">
+                           <i class="bi bi-search"></i>
+                        </button>
+                     </div>
+                  </form>
+               </div>
+            </div>
+      
+            <main class="content">
+               <!-- Page Header -->
+               <div class="d-flex justify-content-between align-items-center mb-4">
+                  <div>
+                     <h4 class="mb-1">{{ page_title if page_title else 'Dashboard' }}</h4>
+                     <p class="text-muted mb-0">{{ page_description if page_description else 'Access an overview of your shop performance and sales.' }}</p>
+                  </div>
+
+                  <!-- Filters -->
+                  <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+                     <!-- Date Filter -->
+                     <div class="dropdown">
+                        <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                           <i class="bi bi-calendar3"></i>
+                           <span class="ms-1">Date Filter</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                           <li>
+                              <a class="dropdown-item {% if date_filter == 'today' %}active{% endif %}" 
+                                 href="{{ url_for('seller_dashboard.dashboard', date_filter='today') }}">Today</a>
+                           </li>
+                           <li>
+                              <a class="dropdown-item {% if date_filter == 'last_7_days' %}active{% endif %}" 
+                                 href="{{ url_for('seller_dashboard.dashboard', date_filter='last_7_days') }}">Last 7 Days</a>
+                           </li>
+                           <li>
+                              <a class="dropdown-item {% if date_filter == 'last_30_days' %}active{% endif %}" 
+                                 href="{{ url_for('seller_dashboard.dashboard', date_filter='last_30_days') }}">Last 30 Days</a>
+                           </li>
+                           <li>
+                              <a class="dropdown-item {% if date_filter == 'this_month' %}active{% endif %}" 
+                                 href="{{ url_for('seller_dashboard.dashboard', date_filter='this_month') }}">This Month</a>
+                           </li>
+                        </ul>
+                     </div>
+
+                     <!-- Custom Date -->
+                     <form class="d-none d-md-flex gap-2" method="GET" action="{{ url_for('seller_dashboard.dashboard') }}">
+                        <input type="date" name="custom_date" class="form-control" value="{{ custom_date }}">
+                        <button type="submit" class="btn btn-dark">
+                           <i class="bi bi-check2"></i>
+                        </button>
+                     </form>
+
+                     <!-- Reset Button -->
+                     <a href="{{ url_for('seller_dashboard.dashboard')}}" class="btn btn-outline-dark d-none d-md-block">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                     </a>
+
+                     <!-- Mobile Filter Button -->
+                     <button class="btn btn-dark d-md-none w-100" type="button" data-bs-toggle="modal" 
+                             data-bs-target="#filtersModal">
+                        <i class="bi bi-funnel"></i>
+                        <span class="ms-1">Filters</span>
+                     </button>
+                  </div>
+               </div>
+
+               <!-- Flash Messages -->
+               {% with messages = get_flashed_messages(with_categories=True) %}
+                  {% if messages %}
+                     <div class="alert-container mb-4">
+                        {% for category, message in messages %}
+                           <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                              {{ message }}
+                              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                           </div>
+                        {% endfor %}
+                     </div>
+                  {% endif %}
+               {% endwith %}
+
+               <!-- Stats Grid -->
+               <div class="stats-container">
+                  <!-- Left Stats -->
+                  <div class="stats-left">
+                     <!-- Total Orders -->
+                     <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <div>
+                              <h6 class="mb-2 text-white-50">Total Orders</h6>
+                              <h3 class="mb-0">{{ stats.sales_stats.total_orders or 0 }}</h3>
+                           </div>
+                           <i class="bi bi-bag fs-1 text-white-50"></i>
+                        </div>
+                     </div>
+
+                     <!-- Total Sales -->
+                     <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <div>
+                              <h6 class="mb-2 text-white-50">Total Sales</h6>
+                              <h3 class="mb-0">₱{{ "{:,.0f}".format(stats.sales_stats.total_sales or 0) }}</h3>
+                           </div>
+                           <i class="bi bi-currency-dollar fs-1 text-white-50"></i>
+                        </div>
+                     </div>
+
+                     <!-- Average Sale -->
+                     <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <div>
+                              <h6 class="mb-2 text-white-50">Average Sale</h6>
+                              <h3 class="mb-0">₱{{ "{:,.0f}".format(stats.sales_stats.average_sale or 0) }}</h3>
+                           </div>
+                           <i class="bi bi-graph-up fs-1 text-white-50"></i>
+                        </div>
+                     </div>
+
+                     <!-- Highest Sale -->
+                     <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <div>
+                              <h6 class="mb-2 text-white-50">Highest Sale</h6>
+                              <h3 class="mb-0">₱{{ "{:,.0f}".format(stats.sales_stats.highest_sale or 0) }}</h3>
+                           </div>
+                           <i class="bi bi-trophy fs-1 text-white-50"></i>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Right Stats -->
+                  <div class="stats-right">
+                     <!-- Pending Orders -->
+                     <div class="card bg-warning text-white">
+                        <div class="card-body">
+                           <div class="d-flex justify-content-between align-items-center">
+                              <div>
+                                 <h6 class="mb-2 text-white-50">Pending Orders</h6>
+                                 <h3 class="mb-0">{{ stats.order_stats.pending_orders or 0 }}</h3>
+                              </div>
+                              <i class="bi bi-clock fs-1 text-white-50"></i>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Processing Orders -->
+                     <div class="card bg-dark text-white">
+                        <div class="card-body">
+                           <div class="d-flex justify-content-between align-items-center">
+                              <div>
+                                 <h6 class="mb-2 text-white-50">Processing Orders</h6>
+                                 <h3 class="mb-0">{{ stats.order_stats.processing_orders or 0 }}</h3>
+                              </div>
+                              <i class="bi bi-box-seam fs-1 text-white-50"></i>
+                           </div>
+                        </div>
+                     </div>
+
+                     <!-- Shipping Orders -->
+                     <div class="card bg-info text-white">
+                        <div class="card-body">
+                           <div class="d-flex justify-content-between align-items-center">
+                              <div>
+                                 <h6 class="mb-2 text-white-50">Shipping Orders</h6>
+                                 <h3 class="mb-0">{{ stats.order_stats.shipping_orders or 0 }}</h3>
+                              </div>
+                              <i class="bi bi-truck fs-1 text-white-50"></i>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Charts Grid -->
+               <div class="chart-container">
+                  <!-- Sales Overview Chart -->
+                  <div class="card h-100">
+                     <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <h6 class="mb-0">Sales Overview</h6>
+                           <!-- Chart Period -->
+                           <div class="dropdown">
+                              <button class="btn btn-sm btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                 Period
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                 <li>
+                                    <a class="dropdown-item {% if chart_period == 'last_7_days' %}active{% endif %}" 
+                                       href="{{ url_for('seller_dashboard.dashboard', chart_period='last_7_days') }}">
+                                       Last 7 Days
+                                    </a>
+                                 </li>
+                                 <li>
+                                    <a class="dropdown-item {% if chart_period == 'last_14_days' %}active{% endif %}" 
+                                       href="{{ url_for('seller_dashboard.dashboard', chart_period='last_14_days') }}">
+                                       Last 14 Days
+                                    </a>
+                                 </li>
+                                 <li>
+                                    <a class="dropdown-item {% if chart_period == 'last_30_days' %}active{% endif %}" 
+                                       href="{{ url_for('seller_dashboard.dashboard', chart_period='last_30_days') }}">
+                                       Last 30 Days
+                                    </a>
+                                 </li>
+                                 <li>
+                                    <a class="dropdown-item {% if chart_period == 'this_month' %}active{% endif %}" 
+                                       href="{{ url_for('seller_dashboard.dashboard', chart_period='this_month') }}">
+                                       This Month
+                                    </a>
+                                 </li>
+                              </ul>
+                           </div>
+
+                           <!-- Chart Custom Date -->
+                           <form class="d-flex align-items-center gap-2">
+                              <input type="date" name="chart_custom_date" class="form-control form-control-sm" 
+                                     value="{{ chart_custom_date }}" style="width: 130px;">
+                              <button type="submit" class="btn btn-sm btn-dark">
+                                 <i class="bi bi-check2"></i>
+                              </button>
+                           </form>
+                        </div>
+                     </div>
+                     <div class="card-body">
+                        <canvas id="salesChart"></canvas>
+                     </div>
+                  </div>
+
+                  <!-- Completed Orders -->
+                  <div class="card bg-success text-white h-100">
+                     <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <div>
+                              <h6 class="mb-2 text-white-50">Completed Orders</h6>
+                              <h3 class="mb-0">{{ stats.order_stats.completed_orders or 0 }}</h3>
+                           </div>
+                           <i class="bi bi-check-circle fs-1 text-white-50"></i>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Tables Grid -->
+               <div class="tables-container">
+                  <!-- Most Sold Products -->
+                  <div class="card h-100">
+                     <div class="card-header">
+                        <h6 class="mb-0">Most Sold Products</h6>
+                     </div>
+                     <div class="card-body p-0">
+                        <div class="table-responsive">
+                           <table class="table table-hover align-middle">
+                              <thead>
+                                 <tr>
+                                    <th>Product</th>
+                                    <th>Sold</th>
+                                    <th>Revenue</th>
+                                    <th>Stock</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 {% if most_sold_products %}
+                                    {% for product in most_sold_products %}
+                                    <tr>
+                                       <td>
+                                          <div class="d-flex align-items-center gap-2">
+                                             <img src="{{ url_for('seller_dashboard.serve_product_main_pic', filename=product.product_main_pic) }}" 
+                                                  alt="{{ product.product_name }}" 
+                                                  class="rounded" 
+                                                  style="width: 40px; height: 40px; object-fit: cover;">
+                                             <div>
+                                                <div class="fw-medium">{{ product.product_name[:20] }}{% if product.product_name|length > 20 %}...{% endif %}</div>
+                                                <small class="text-muted">{{ product.variant }} - {{ product.color }}</small>
+                                             </div>
+                                          </div>
+                                       </td>
+                                       <td class="fw-medium">{{ product.total_quantity_sold or 0 }}</td>
+                                       <td class="text-success fw-medium">₱{{ "{:,.0f}".format(product.total_revenue or 0) }}</td>
+                                       <td>
+                                          <span class="badge {% if product.stock_status == 'Active' %}bg-success
+                                                           {% elif product.stock_status == 'Nearly Out of Stock' %}bg-warning
+                                                           {% elif product.stock_status == 'Out of Stock' %}bg-danger
+                                                           {% else %}bg-secondary{% endif %}">
+                                             {{ product.stock }}
+                                          </span>
+                                       </td>
+                                    </tr>
+                                    {% endfor %}
+                                 {% else %}
+                                    <tr>
+                                       <td colspan="4" class="text-center py-4">
+                                          <div class="text-muted">
+                                             <i class="bi bi-graph-up display-6 d-block mb-2"></i>
+                                             <p class="mb-0">No sales data found</p>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 {% endif %}
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                     <div class="card-footer text-center py-3">
+                        <a href="{{ url_for('seller_inventory.inventory') }}" class="btn btn-dark btn-sm">
+                           View Inventory <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                     </div>
+                  </div>
+
+                  <!-- Recent Orders -->
+                  <div class="card h-100">
+                     <div class="card-header">
+                        <h6 class="mb-0">Recent Orders</h6>
+                     </div>
+                     <div class="card-body p-0">
+                        <div class="table-responsive">
+                           <table class="table table-hover align-middle">
+                              <thead>
+                                 <tr>
+                                    <th>Order ID</th>
+                                    <th>Product</th>
+                                    <th>Buyer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 {% if recent_orders %}
+                                    {% for order in recent_orders %}
+                                    <tr>
+                                       <td class="fw-medium">#{{ order.order_id }}</td>
+                                       <td>
+                                          <div class="d-flex align-items-center gap-2">
+                                             <img src="{{ url_for('seller_dashboard.serve_product_main_pic', filename=order.product_main_pic) }}" 
+                                                  alt="{{ order.product_name }}" 
+                                                  class="rounded" 
+                                                  style="width: 40px; height: 40px; object-fit: cover;">
+                                             <div>
+                                                <div class="fw-medium">{{ order.product_name[:20] }}{% if order.product_name|length > 20 %}...{% endif %}</div>
+                                                <small class="text-muted">{{ order.variant }} - {{ order.color }}</small>
+                                             </div>
+                                          </div>
+                                       </td>
+                                       <td>
+                                          <div>
+                                             <div class="fw-medium">{{ order.buyer_firstname }} {{ order.buyer_lastname }}</div>
+                                             <small class="text-muted">{{ order.buyer_phone }}</small>
+                                          </div>
+                                       </td>
+                                       <td class="fw-medium">₱{{ "{:,.2f}".format(order.total_amount) }}</td>
+                                       <td>
+                                          <span class="badge {% if order.status == 'Pending' %}bg-warning
+                                                           {% elif order.status in ['To Pack', 'Packed'] %}bg-dark
+                                                           {% elif order.status in ['Shipping', 'Shipped', 'For Delivery', 'Out for Delivery'] %}bg-info
+                                                           {% elif order.status in ['Delivered', 'Received'] %}bg-success
+                                                           {% else %}bg-secondary{% endif %}">
+                                             {{ order.status }}
+                                          </span>
+                                       </td>
+                                    </tr>
+                                    {% endfor %}
+                                 {% else %}
+                                    <tr>
+                                       <td colspan="5" class="text-center py-4">
+                                          <div class="text-muted">
+                                             <i class="bi bi-bag display-6 d-block mb-2"></i>
+                                             <p class="mb-0">No recent orders found</p>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 {% endif %}
+                              </tbody>
+                           </table>
+                        </div>
+                     </div>
+                     <div class="card-footer text-center py-3">
+                        <a href="{{ url_for('seller_orders.orders') }}" class="btn btn-dark btn-sm">
+                           View All Orders <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                     </div>
+                  </div>
+               </div>
+            </main>          
+         </div>
+     
+        {% endblock %}
+        <!-- Main End-->
+    </div>
+
+    <!-- Mobile Filters Modal -->
+    <div class="modal fade" id="filtersModal" tabindex="-1">
+       <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+             <div class="modal-header">
+                <h5 class="modal-title">Filter Dashboard</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+             </div>
+             <div class="modal-body">
+                <form method="GET" action="{{ url_for('seller_dashboard.dashboard') }}">
+                   <!-- Dashboard Filters -->
+                   <div class="mb-4">
+                      <h6 class="text-dark mb-3">Dashboard Filters</h6>
+                      <div class="mb-3">
+                         <label class="form-label">Date Filter</label>
+                         <select name="date_filter" class="form-select">
+                            <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                            <option value="last_7_days" {% if date_filter == 'last_7_days' %}selected{% endif %}>Last 7 Days</option>
+                            <option value="last_30_days" {% if date_filter == 'last_30_days' %}selected{% endif %}>Last 30 Days</option>
+                            <option value="this_month" {% if date_filter == 'this_month' %}selected{% endif %}>This Month</option>
+                         </select>
+                      </div>
+                      <div class="mb-3">
+                         <label class="form-label">Custom Date</label>
+                         <input type="date" name="custom_date" class="form-control" value="{{ custom_date }}">
+                      </div>
+                   </div>
+
+                   <!-- Chart Filters -->
+                   <div class="mb-4">
+                      <h6 class="text-dark mb-3">Chart Filters</h6>
+                      <div class="mb-3">
+                         <label class="form-label">Chart Period</label>
+                         <select name="chart_period" class="form-select">
+                            <option value="last_7_days" {% if chart_period == 'last_7_days' %}selected{% endif %}>Last 7 Days</option>
+                            <option value="last_14_days" {% if chart_period == 'last_14_days' %}selected{% endif %}>Last 14 Days</option>
+                            <option value="last_30_days" {% if chart_period == 'last_30_days' %}selected{% endif %}>Last 30 Days</option>
+                            <option value="this_month" {% if chart_period == 'this_month' %}selected{% endif %}>This Month</option>
+                         </select>
+                      </div>
+                      <div class="mb-3">
+                         <label class="form-label">Chart Custom Date</label>
+                         <input type="date" name="chart_custom_date" class="form-control" value="{{ chart_custom_date }}">
+                      </div>
+                   </div>
+
+                   <div class="d-flex gap-2">
+                      <button type="submit" class="btn btn-dark flex-grow-1">Apply Filters</button>
+                      <a href="{{ url_for('seller_dashboard.dashboard') }}" class="btn btn-outline-dark">Reset</a>
+                   </div>
+                </form>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+       <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+             <div class="modal-header">
+                <h5 class="modal-title">Confirm Logout</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+             </div>
+             <div class="modal-body">
+                Are you sure you want to log out?
+             </div>
+             <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <a href="{{ url_for('login.logout') }}" class="btn btn-dark">Yes, Log Out</a>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <script>
+    // Sidebar Toggle
+    document.querySelector('.toggler-btn').addEventListener('click', function() {
+       document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    // Logout Confirmation
+    document.querySelector('a[href="{{ url_for("login.logout") }}"]').addEventListener('click', function(e) {
+       e.preventDefault();
+       new bootstrap.Modal(document.getElementById('logoutModal')).show();
+    });
+
+    // Notification Badge Update
+    function updateNotificationBadge() {
+       fetch('/seller/notifications/count')
+          .then(response => response.json())
+          .then(data => {
+             const badge = document.getElementById('notificationBadge');
+             if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.classList.remove('d-none');
+             } else {
+                badge.classList.add('d-none');
+             }
+          })
+          .catch(error => console.error('Error:', error));
+    }
+
+    // Update badge on load and every 30 seconds
+    document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+    setInterval(updateNotificationBadge, 30000);
+
+    // Sales Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartData = JSON.parse('{{ chart_data|tojson|safe }}');
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.daily_labels,
+                datasets: [{
+                    label: 'Sales',
+                    data: chartData.daily_sales,
+                    fill: true,
+                    borderColor: '#212529',
+                    backgroundColor: 'rgba(33, 37, 41, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointBackgroundColor: '#212529',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#212529',
+                        bodyColor: '#212529',
+                        borderColor: '#dee2e6',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return '₱' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            drawBorder: false,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: false,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return '₱' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    });
+    </script>
+
+</body>
+</html>

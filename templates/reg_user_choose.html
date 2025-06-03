@@ -1,0 +1,89 @@
+{% extends "base_form.html" %}
+
+{% block title %}Register - Choose Role{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #1a1a1a;
+        --primary-hover: #2d2d2d;
+    }
+
+    .page-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .form-container {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-container h2 {
+        color: #333;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-hover);
+        border-color: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    .exit-icon {
+        transition: all 0.3s ease;
+    }
+
+    .exit-icon:hover {
+        opacity: 0.7;
+    }
+
+    .registration-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+</style>
+
+<div class="page-container">
+    <div class="form-container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2>Register</h2>
+            <a href="{{ url_for('login.show_user_terms') }}" class="exit-icon text-dark">
+                <i class="bi bi-arrow-left fs-4"></i>
+            </a>
+        </div>
+
+        <p class="text-muted">Please choose how you would like to register as:</p>
+
+        <!-- Registration options -->
+        <div class="registration-options">
+            <a href="{{ url_for('buyer_registration.get_personal_info') }}" class="btn btn-primary">Buyer</a>
+            <a href="{{ url_for('seller_registration.get_personal_info') }}" class="btn btn-primary">Seller</a>
+            <a href="{{ url_for('courier_registration.get_personal_info') }}" class="btn btn-primary">Courier</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

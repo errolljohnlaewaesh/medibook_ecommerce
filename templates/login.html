@@ -1,0 +1,249 @@
+{% extends "base_form.html" %}
+
+{% block title %}MediBook - Login{% endblock %}
+
+{% block search_keyword %}
+    <meta name="keywords" content="MediBook Login, Login, Ecommerce Login, Online Store Login">
+    <meta name="description" content="Login to MediBook Ecommerce and Enjoy seamlessly shopping in just one tap.">
+{% endblock %}
+
+{% block content %}
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --primary-hover: #2d2d2d;
+            --link-color: #1a1a1a;
+            --link-hover: #2d2d2d;
+        }
+
+        .login-page-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            padding: 2rem;
+        }
+
+        .form-container {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-container h2 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e1e1e1;
+            background-color: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .exit-icon {
+            transition: all 0.3s ease;
+        }
+
+        .exit-icon:hover {
+            opacity: 0.7;
+        }
+
+        .form-check-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .forgot-pass {
+            color: var(--link-color);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-pass:hover {
+            color: var(--link-hover);
+            text-decoration: underline;
+        }
+
+        .register-text {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-link {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .register-link:hover {
+            color: var(--link-hover);
+            text-decoration: underline;
+        }
+
+        .alert-container {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Modal customization */
+        .modal-header.bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .modal .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .modal .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+    </style>
+
+    <div class="login-page-container">
+        <div class="form-container position-relative">
+            <a href="/" class="exit-icon text-dark">
+                <i class="bi bi-x fs-4"></i>
+            </a>
+            
+            <h2 class="text-center mb-4">Login</h2>
+    
+            <!-- Message Box -->
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %} 
+    
+            <form action="" method="POST">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="email" class="form-control" id="username" name="username" placeholder="Enter your email" required>
+                </div>
+    
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="showPassword">
+                        <label class="form-check-label" for="showPassword">Show Password</label>
+                    </div>
+        
+                    <a href="{{ url_for('login.forgot_pass')}}" class="forgot-pass">Forgot Password?</a>
+                </div>
+    
+                <button type="submit" class="btn btn-primary w-100 mb-4">Login</button>
+            
+                <div class="text-center">
+                    <p class="register-text">Don't have an account?</p>
+                    <a href="{{ url_for('login.show_user_terms')}}" class="register-link">Register Now!</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Login Success -->
+    <div class="modal fade" id="loginSuccessModal" tabindex="-1" aria-labelledby="loginSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h6 class="modal-title text-white fw-semibold" id="loginSuccessModalLabel">Welcome Back!</h6>
+                    <button type="button" class="border-0 bg-transparent text-white" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="modal-body d-flex align-items-center">
+                    You have successfully logged in to your account.
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    {% if user_role == 'Buyer' %}
+                        <a href="{{ url_for('buyer_homepage.show_buyer_homepage') }}" class="btn btn-primary">Okay</a>
+                    {% elif user_role == 'Seller' %}
+                        <a href="{{ url_for('seller_dashboard.dashboard') }}" class="btn btn-primary">Okay</a>
+                    {% elif user_role == 'Courier' %}
+                        <a href="{{ url_for('courier_dashboard.dashboard') }}" class="btn btn-primary">Okay</a>
+                    {% elif user_role == 'Admin' %}
+                        <a href="{{ url_for('admin_dashboard.dashboard') }}" class="btn btn-primary">Okay</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if login_success %}
+        <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+                var myModal = new bootstrap.Modal(document.getElementById('loginSuccessModal'), {
+                    keyboard: false
+                });
+                myModal.show();
+            });
+        </script>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const showPasswordCheckbox = document.getElementById('showPassword');
+
+            if (showPasswordCheckbox && passwordInput) {
+                showPasswordCheckbox.addEventListener('change', function() {
+                    passwordInput.type = this.checked ? 'text' : 'password';
+                });
+            }
+        });
+    </script>
+{% endblock %}

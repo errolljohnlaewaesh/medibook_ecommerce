@@ -1,0 +1,180 @@
+{% extends "seller_dashboard.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block seller_content %}
+<div class="main">
+   <!-- Top Bar -->
+   <nav class="navbar navbar-expand d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center">
+         <button class="toggler-btn" type="button">
+            <img src="{{ url_for('static', filename='img/icons/menu.png') }}" style="width: 25px; height: 20px;">
+         </button>
+         <a class="navbar-brand ms-3" href="#">
+            <img src="{{ url_for('static', filename='img/logo/logo_dark.svg') }}" alt="MediBook Logo" width="150">
+         </a>
+      </div>
+   </nav>
+
+   <!-- Main Content -->
+   <main class="content">
+      <!-- Title Bar -->
+      <div class="container-fluid title-container d-flex flex-lg-row flex-column align-items-center justify-content-between mb-4">
+         <div class="title">
+            <h4>Notifications</h4>
+            <p class="text-muted mb-0">Your recent notifications and updates.</p>
+         </div>
+         
+         <div class="d-flex gap-2 mt-3 mt-lg-0">
+            <!-- Sort By Dropdown -->
+            <div class="dropdown">
+               <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-sort-down me-1"></i> Sort By
+               </button>
+               <ul class="dropdown-menu">
+                  <li><a class="dropdown-item {% if sort_by == 'recent' %}active{% endif %}" href="{{ url_for('seller_notifications.notifications', sort_by='recent') }}">Most Recent</a></li>
+                  <li><a class="dropdown-item {% if sort_by == 'oldest' %}active{% endif %}" href="{{ url_for('seller_notifications.notifications', sort_by='oldest') }}">Oldest</a></li>
+               </ul>
+            </div>
+         </div>
+      </div>
+
+      <!-- Notifications List -->
+      <div class="card border-0 shadow-sm">
+         <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+               {% for notification in notifications %}
+               <div class="list-group-item {% if notification.status == 'Unread' %}bg-light{% endif %}">
+                  <div class="d-flex flex-column">
+                     <div class="d-flex flex-row align-items-center justify-content-between">
+                        <div class="d-flex flex-row align-items-center">
+                           {% if notification.notification_type == 'Account Registration' %}
+                              <img src="{{ url_for('static', filename='img/icons/user.png') }}" alt="User Icon" class="me-2" style="width: 1.5rem; opacity: 30%;">
+                           {% elif notification.notification_type == 'New Product' %}
+                              <img src="{{ url_for('static', filename='img/icons/product.png') }}" alt="Product Icon" class="me-2" style="width: 1.5rem; opacity: 30%;">
+                           {% elif notification.notification_type == 'New Order' %}
+                              <img src="{{ url_for('static', filename='img/notifications/seller/order.png') }}" alt="Order Icon" class="me-2" style="width: 1.5rem; opacity: 30%;">
+                           {% else %}
+                              <img src="{{ url_for('static', filename='img/notifications/seller/notification.png') }}" alt="Notification Icon" class="me-2" style="width: 1.5rem; opacity: 30%;">
+                           {% endif %}
+                           <span class="fw-medium">{{ notification.notification_title }}</span>
+                        </div>
+                        <small class="text-muted ms-2">{{ notification.created_at.strftime('%d %b %Y, %H:%M') }}</small>
+                     </div>
+                     <div class="mt-2 text-secondary">{{ notification.content | replace('\n', '<br>') | safe }}</div>
+                  </div>
+               </div>
+               {% endfor %}
+            </div>
+         </div>
+      </div>
+
+      <!-- Pagination -->
+      <nav class="mt-4" aria-label="Notifications pagination">
+         <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#" id="prevPage">Previous</a></li>
+            <li class="page-item pagination-numbers-container d-flex flex-row"></li> 
+            <li class="page-item"><a class="page-link" href="#" id="nextPage">Next</a></li>
+         </ul>
+      </nav>
+
+   </main>
+</div>
+
+<style>
+.main {
+   padding: 2rem;
+   min-height: 100vh;
+   background: #f8f9fa;
+}
+
+.content {
+   background: #fff;
+   border-radius: 8px;
+   box-shadow: 0 0 15px rgba(0,0,0,0.05);
+   padding: 2rem;
+}
+
+.title-container {
+   padding-bottom: 1.5rem;
+   border-bottom: 1px solid #dee2e6;
+}
+
+.title h4 {
+   margin-bottom: 0.5rem;
+   font-weight: 600;
+}
+
+.btn-primary {
+   background-color: #212529;
+   border-color: #212529;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+   background-color: #343a40;
+   border-color: #343a40;
+}
+
+.btn-outline-primary {
+   color: #212529;
+   border-color: #212529;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+   background-color: #212529;
+   border-color: #212529;
+}
+
+.dropdown-menu {
+   border-radius: 4px;
+   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.dropdown-item.active {
+   background-color: #212529;
+}
+
+.list-group-item {
+   border-left: none;
+   border-right: none;
+   padding: 1.25rem;
+}
+
+.list-group-item:first-child {
+   border-top: none;
+}
+
+.list-group-item:last-child {
+   border-bottom: none;
+}
+
+.list-group-item.bg-light {
+   background-color: #f8f9fa !important;
+}
+
+.page-link {
+   color: #212529;
+}
+
+.page-item.active .page-link {
+   background-color: #212529;
+   border-color: #212529;
+}
+
+.notification-title {
+   font-weight: 500;
+}
+
+.notification-time {
+   font-size: 0.875rem;
+}
+
+.notification-content {
+   color: #6c757d;
+   margin-top: 0.5rem;
+}
+</style>
+
+{% endblock %}

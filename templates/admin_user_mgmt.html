@@ -1,0 +1,567 @@
+{% extends "admin_dashboard.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block admin_content %}
+<div class="main">
+   <!-- Top Bar -->
+   <nav class="navbar navbar-expand d-flex align-items-center justify-content-between w-100">
+      <!-- MediBook Logo -->
+      <div class="d-flex align-items-center">
+         <button class="toggler-btn" type="button">
+            <img src="{{ url_for('static', filename='img/icons/menu.png') }}" alt="Menu" style="width: 25px; height: 20px;">
+         </button>
+         <a class="navbar-brand ms-3" href="#">
+            <img src="{{ url_for('static', filename='img/logo/logo_dark.svg') }}" alt="MediBook Logo" width="150">
+         </a>
+      </div>
+
+      <!-- Search Bar for Desktop -->
+      <form class="d-flex justify-content-end d-none d-md-flex" role="search" method="GET" action="{{ url_for('admin_user_mgmt.user_mgmt') }}">
+         <input type="hidden" name="status" value="{{ selected_status }}">
+         <input type="hidden" name="sort_by" value="{{ sort_by }}">
+         <input type="hidden" name="order" value="{{ order }}">
+         <div class="input-group">
+            <input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Search users..." aria-label="Search">
+            <button class="btn btn-primary" type="submit">
+               <img src="{{ url_for('static', filename='img/icons/search.png') }}" alt="Search" width="20">
+            </button>
+         </div>
+      </form>
+
+      <!-- Mobile Search Button -->
+      <button class="btn btn-primary d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
+         <img src="{{ url_for('static', filename='img/icons/search.png') }}" alt="Search" width="20">
+      </button>
+   </nav>
+
+   <!-- Mobile Search Offcanvas -->
+   <div class="offcanvas offcanvas-top" id="searchOffcanvas" tabindex="-1">
+      <div class="offcanvas-header">
+         <h5 class="offcanvas-title">Search Users</h5>
+         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      </div>
+      <div class="offcanvas-body">
+         <form role="search" method="GET" action="{{ url_for('admin_user_mgmt.user_mgmt') }}">
+            <input type="hidden" name="status" value="{{ selected_status }}">
+            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+            <input type="hidden" name="order" value="{{ order }}">
+            <div class="input-group">
+               <input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Search users...">
+               <button class="btn btn-primary" type="submit">
+                  <img src="{{ url_for('static', filename='img/icons/search.png') }}" alt="Search" width="20">
+               </button>
+            </div>
+         </form>
+      </div>
+   </div>
+
+   <!-- Main Content -->
+   <main class="content px-4 py-3">
+      <!-- Title Section -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+         <div>
+            <h4 class="mb-1">User Management</h4>
+            <p class="text-muted mb-0">Manage and monitor all user accounts</p>
+         </div>
+         
+         <!-- Action Buttons -->
+         <div class="d-flex flex-wrap gap-2">
+            <!-- Sort Dropdown -->
+            <div class="dropdown">
+               <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-sort-down me-1"></i> Sort
+               </button>
+               <ul class="dropdown-menu">
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'date_created' and order == 'DESC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', sort_by='date_created', order='DESC', status=selected_status, search=search) }}">
+                        Recent
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'date_created' and order == 'ASC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', sort_by='date_created', order='ASC', status=selected_status, search=search) }}">
+                        Oldest
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'firstname' and order == 'ASC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', sort_by='firstname', order='ASC', status=selected_status, search=search) }}">
+                        Name (A-Z)
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if sort_by == 'firstname' and order == 'DESC' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', sort_by='firstname', order='DESC', status=selected_status, search=search) }}">
+                        Name (Z-A)
+                     </a>
+                  </li>
+               </ul>
+            </div>
+
+            <!-- Filter Dropdown -->
+            <div class="dropdown">
+               <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-funnel me-1"></i> Filter
+               </button>
+               <ul class="dropdown-menu">
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Approved' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', status='Approved', sort_by=sort_by, order=order, search=search) }}">
+                        Active Users
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Archived' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', status='Archived', sort_by=sort_by, order=order, search=search) }}">
+                        Archived Users
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Banned' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', status='Banned', sort_by=sort_by, order=order, search=search) }}">
+                        Banned Users
+                     </a>
+                  </li>
+                  <li>
+                     <a class="dropdown-item {% if selected_status == 'Suspended' %}active{% endif %}" 
+                        href="{{ url_for('admin_user_mgmt.user_mgmt', status='Suspended', sort_by=sort_by, order=order, search=search) }}">
+                        Suspended Users
+                     </a>
+                  </li>
+               </ul>
+            </div>
+
+            <!-- Reset Button -->
+            <a href="{{ url_for('admin_user_mgmt.user_mgmt') }}" class="btn btn-outline-primary">
+               <i class="bi bi-arrow-clockwise"></i>
+            </a>
+         </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="row g-3 mb-4">
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-people fs-4 text-primary"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Total Users</p>
+                        <h4 class="mb-0">{{ stats.total_users }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-person-check fs-4 text-success"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Active Users</p>
+                        <h4 class="mb-0">{{ stats.active_users }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-person-dash fs-4 text-warning"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Suspended Users</p>
+                        <h4 class="mb-0">{{ stats.suspended_users }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="col-12 col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm">
+               <div class="card-body">
+                  <div class="d-flex align-items-center">
+                     <div class="flex-shrink-0 me-3">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded">
+                           <i class="bi bi-person-x fs-4 text-danger"></i>
+                        </div>
+                     </div>
+                     <div>
+                        <p class="mb-0 text-muted">Banned Users</p>
+                        <h4 class="mb-0">{{ stats.banned_users }}</h4>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Alert Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+         {% if messages %}
+            {% for category, message in messages %}
+               <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+               </div>
+            {% endfor %}
+         {% endif %}
+      {% endwith %}
+
+      <!-- Users Table -->
+      <div class="card border-0 shadow-sm">
+         <div class="card-body p-0">
+            <div class="table-responsive">
+               <table class="table table-hover mb-0">
+                  <thead class="bg-primary text-white">
+                     <tr>
+                        <th scope="col" width="40">
+                           <div class="form-check">
+                              <input class="form-check-input" type="checkbox" id="selectAll">
+                           </div>
+                        </th>
+                        <th scope="col">#</th>
+                        <th scope="col">User</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Joined Date</th>
+                        <th scope="col" width="100">Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody class="align-middle">
+                     {% if users %}
+                        {% for user in users %}
+                        <tr>
+                           <td>
+                              <div class="form-check">
+                                 <input class="form-check-input" type="checkbox" name="selected_users" value="{{ user.id }}">
+                              </div>
+                           </td>
+                           <td>{{ loop.index }}</td>
+                           <td>
+                              <div class="d-flex align-items-center">
+                                 {% if user.profile_pic %}
+                                    <img src="{{ url_for('static', filename='uploads/user/profile_pic/' + user.profile_pic) }}" 
+                                         class="rounded-circle me-2" width="40" height="40" alt="Profile Picture">
+                                 {% else %}
+                                    <img src="{{ url_for('static', filename='img/profile/default_profile.png') }}" 
+                                         class="rounded-circle me-2" width="40" height="40" alt="Default Profile">
+                                 {% endif %}
+                                 <div>
+                                    <h6 class="mb-0">{{ user.firstname }} {{ user.lastname }}</h6>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                 </div>
+                              </div>
+                           </td>
+                           <td>
+                              <div>
+                                 <div class="mb-1">
+                                    <i class="bi bi-telephone me-1"></i>
+                                    {{ user.phone }}
+                                 </div>
+                                 <small class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    {{ user.city }}, {{ user.province }}
+                                 </small>
+                              </div>
+                           </td>
+                           <td>
+                              <span class="badge {% if user.status == 'Approved' %}bg-success
+                                    {% elif user.status == 'Archived' %}bg-secondary
+                                    {% elif user.status == 'Banned' %}bg-danger
+                                    {% elif user.status == 'Suspended' %}bg-warning
+                                    {% else %}bg-dark{% endif %}">
+                                 {{ user.status }}
+                              </span>
+                           </td>
+                           <td>{{ user.date_created.strftime('%b %d, %Y') }}</td>
+                           <td>
+                              <div class="dropdown">
+                                 <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                 </button>
+                                 <ul class="dropdown-menu">
+                                    <li>
+                                       <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#userDetailsModal{{ user.id }}">
+                                          <i class="bi bi-eye me-2"></i>View Details
+                                       </button>
+                                    </li>
+                                    {% if user.status == 'Approved' %}
+                                       <li>
+                                          <button type="button" class="dropdown-item" onclick="updateUserStatus('{{ user.id }}', 'Archived')">
+                                             <i class="bi bi-archive me-2"></i>Archive
+                                          </button>
+                                       </li>
+                                       <li>
+                                          <button type="button" class="dropdown-item" onclick="updateUserStatus('{{ user.id }}', 'Suspended')">
+                                             <i class="bi bi-pause-circle me-2"></i>Suspend
+                                          </button>
+                                       </li>
+                                       <li>
+                                          <button type="button" class="dropdown-item text-danger" onclick="updateUserStatus('{{ user.id }}', 'Banned')">
+                                             <i class="bi bi-x-circle me-2"></i>Ban
+                                          </button>
+                                       </li>
+                                    {% else %}
+                                       <li>
+                                          <button type="button" class="dropdown-item text-success" onclick="updateUserStatus('{{ user.id }}', 'Approved')">
+                                             <i class="bi bi-check-circle me-2"></i>Activate
+                                          </button>
+                                       </li>
+                                    {% endif %}
+                                 </ul>
+                              </div>
+                           </td>
+                        </tr>
+
+                        <!-- User Details Modal -->
+                        <div class="modal fade" id="userDetailsModal{{ user.id }}" tabindex="-1">
+                           <div class="modal-dialog modal-lg modal-dialog-centered">
+                              <div class="modal-content">
+                                 <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">User Details</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                 </div>
+                                 <div class="modal-body">
+                                    <div class="row g-4">
+                                       <!-- Profile Section -->
+                                       <div class="col-md-4 text-center">
+                                          {% if user.profile_pic %}
+                                             <img src="{{ url_for('static', filename='uploads/user/profile_pic/' + user.profile_pic) }}" 
+                                                  class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+                                          {% else %}
+                                             <img src="{{ url_for('static', filename='img/profile/default_profile.png') }}" 
+                                                  class="rounded-circle mb-3" width="120" height="120" alt="Default Profile">
+                                          {% endif %}
+                                          <h5 class="mb-1">{{ user.firstname }} {{ user.lastname }}</h5>
+                                          <span class="badge {% if user.status == 'Approved' %}bg-success
+                                                {% elif user.status == 'Archived' %}bg-secondary
+                                                {% elif user.status == 'Banned' %}bg-danger
+                                                {% elif user.status == 'Suspended' %}bg-warning
+                                                {% else %}bg-dark{% endif %}">
+                                             {{ user.status }}
+                                          </span>
+                                       </div>
+                                       
+                                       <!-- Details Section -->
+                                       <div class="col-md-8">
+                                          <div class="row g-3">
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">Email</p>
+                                                <p class="mb-3">{{ user.email }}</p>
+                                                
+                                                <p class="mb-1 text-muted">Phone</p>
+                                                <p class="mb-3">{{ user.phone }}</p>
+                                                
+                                                <p class="mb-1 text-muted">Date of Birth</p>
+                                                <p class="mb-3">{{ user.birthdate.strftime('%B %d, %Y') }}</p>
+                                             </div>
+                                             
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">Gender</p>
+                                                <p class="mb-3">{{ user.sex }}</p>
+                                                
+                                                <p class="mb-1 text-muted">Address</p>
+                                                <p class="mb-3">
+                                                   {{ user.house_no }} {{ user.street }}<br>
+                                                   {{ user.barangay }}, {{ user.city }}<br>
+                                                   {{ user.province }}
+                                                </p>
+                                             </div>
+                                          </div>
+                                       </div>
+
+                                       <!-- ID Information -->
+                                       <div class="col-12">
+                                          <h6 class="border-bottom pb-2">ID Information</h6>
+                                          <div class="row g-3">
+                                             <div class="col-md-6">
+                                                <p class="mb-1 text-muted">ID Type</p>
+                                                <p class="mb-3">{{ user.id_type }}</p>
+                                                
+                                                <p class="mb-1 text-muted">ID Number</p>
+                                                <p class="mb-0">{{ user.id_no }}</p>
+                                             </div>
+                                             <div class="col-md-6">
+                                                {% if user.id_pic %}
+                                                   <img src="{{ url_for('static', filename='uploads/user/id_pic/' + user.id_pic) }}" 
+                                                        class="img-fluid rounded" alt="ID Picture">
+                                                {% else %}
+                                                   <div class="alert alert-warning mb-0">
+                                                      No ID picture uploaded
+                                                   </div>
+                                                {% endif %}
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        {% endfor %}
+                     {% else %}
+                        <tr>
+                           <td colspan="7" class="text-center py-4">
+                              <div class="text-muted">
+                                 <i class="bi bi-people display-4 d-block mb-3"></i>
+                                 <h5>No Users Found</h5>
+                                 <p class="mb-0">There are no users matching your search criteria.</p>
+                              </div>
+                           </td>
+                        </tr>
+                     {% endif %}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <nav class="mt-4">
+         <ul class="pagination justify-content-center">
+            <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+               <a class="page-link" href="{{ url_for('admin_user_mgmt.user_mgmt', page=current_page-1) }}">Previous</a>
+            </li>
+            {% for page in range(1, total_pages + 1) %}
+            <li class="page-item {% if page == current_page %}active{% endif %}">
+               <a class="page-link" href="{{ url_for('admin_user_mgmt.user_mgmt', page=page) }}">{{ page }}</a>
+            </li>
+            {% endfor %}
+            <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+               <a class="page-link" href="{{ url_for('admin_user_mgmt.user_mgmt', page=current_page+1) }}">Next</a>
+            </li>
+         </ul>
+      </nav>
+      {% endif %}
+   </main>
+</div>
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1">
+   <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+         <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Confirm Status Update</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+         </div>
+         <div class="modal-body">
+            <p>Are you sure you want to update the status of this user?</p>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="confirmStatusUpdate">Update</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<style>
+/* Custom styles for user management */
+.card {
+   transition: transform 0.2s ease;
+}
+
+.card:hover {
+   transform: translateY(-2px);
+}
+
+.table th {
+   font-weight: 500;
+}
+
+.table td {
+   vertical-align: middle;
+}
+
+.dropdown-menu {
+   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+   font-weight: 500;
+   padding: 0.5em 0.75em;
+}
+
+.modal-header {
+   border-bottom: none;
+}
+
+.modal-footer {
+   border-top: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+   .title-container {
+      text-align: center;
+   }
+   
+   .btn-container {
+      justify-content: center;
+   }
+}
+</style>
+
+<script>
+// Handle bulk selection
+document.getElementById('selectAll').addEventListener('change', function() {
+   document.querySelectorAll('input[name="selected_users"]').forEach(checkbox => {
+      checkbox.checked = this.checked;
+   });
+});
+
+// Handle status updates
+function updateUserStatus(userId, status) {
+   const modal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+   const confirmBtn = document.getElementById('confirmStatusUpdate');
+   
+   confirmBtn.onclick = function() {
+      fetch('/admin/user/update-status', {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({
+            user_id: userId,
+            status: status
+         })
+      })
+      .then(response => response.json())
+      .then(data => {
+         if (data.success) {
+            location.reload();
+         } else {
+            alert('Failed to update status: ' + data.message);
+         }
+      })
+      .catch(error => {
+         console.error('Error:', error);
+         alert('An error occurred while updating the status');
+      });
+      
+      modal.hide();
+   };
+   
+   modal.show();
+}
+</script>
+
+{% endblock %}

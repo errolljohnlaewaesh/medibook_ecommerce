@@ -1,0 +1,417 @@
+{% extends "buyer_homepage.html" %}
+
+{% block title %}{{ category }} - MediBook{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/buyer_categories.css') }}">
+
+<style>
+/* Updated styling for dark theme */
+.filter-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-panel .form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.filter-panel .form-select {
+    border-color: #dee2e6;
+}
+
+.filter-panel .form-select:focus {
+    border-color: #212529;
+    box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.25);
+}
+
+.btn-dark {
+    background-color: #212529;
+    border-color: #212529;
+}
+
+.btn-dark:hover {
+    background-color: #1a1e21;
+    border-color: #1a1e21;
+}
+
+.btn-outline-dark {
+    color: #212529;
+    border-color: #212529;
+}
+
+.btn-outline-dark:hover {
+    background-color: #212529;
+    border-color: #212529;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #212529;
+    border-color: #212529;
+}
+
+.pagination .page-link {
+    color: #212529;
+}
+
+.pagination .page-link:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #212529;
+}
+
+.product-item {
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.product-item:hover {
+    transform: translateY(-5px);
+}
+
+.hover-overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-image-container:hover .hover-overlay {
+    opacity: 1;
+}
+
+.filter-dropdown {
+    position: relative;
+}
+
+.filter-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.filter-header {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.filter-header:hover {
+    background: #f8f9fa;
+}
+
+.filter-section {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-section:last-child {
+    border-bottom: none;
+}
+</style>
+
+<div class="container-fluid py-4">
+    <!-- MESSAGE BOX -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        <div class="alert-container">
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('buyer_homepage.show_buyer_homepage')}}" class="text-dark">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ category }}</li>
+        </ol>
+    </nav>
+
+    <!-- Mobile Filter Button -->
+    <button class="btn btn-dark d-lg-none w-100 mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+        <i class="bi bi-funnel me-2"></i>Filters
+    </button>
+    
+    <div class="row">
+        <!-- Main Content Area -->
+        <div class="col-lg-9 order-2 order-lg-1">
+            <!-- Products Count -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                        <p class="text-muted mb-0">
+                            Showing {{ ((page - 1) * 16) + 1 }} - {{ ((page - 1) * 16) + products|length }} of {{ total_products }} products
+                            {% if page > 1 %}(Page {{ page }} of {{ total_pages }}){% endif %}
+                        </p>
+                </div>
+
+            <!-- Products Grid -->
+            <div class="row g-4">
+                    {% if products %}
+                        {% for product in products %}
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="product-item bg-white rounded shadow-sm overflow-hidden">
+                                <div class="product-image-container position-relative">
+                                <a href="{{ url_for('buyer_product.product_page', product_info_id=product['product_info_id']) }}">
+                                        {% if product['product_main_pic'] %}
+                                            <img src="{{ url_for('buyer_categories.serve_product_main_pic', filename=product['product_main_pic']) }}" 
+                                                alt="{{ product['product_name'] }}" 
+                                                class="product-image img-fluid w-100">
+                                        {% else %}
+                                            <div class="product-image img-fluid w-100 d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                                            <i class="bi bi-image text-muted fs-1"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="hover-overlay">
+                                        <span class="btn btn-dark">View Details</span>
+                                        </div>
+                                    </a>
+                                </div>
+                    
+                            <div class="product-details p-3">
+                                <!-- 1. Product Name -->
+                                <h6 class="product-name text-dark fw-bold mb-3 text-truncate">{{ product['product_name'] }}</h6>
+                                
+                                <!-- 2. Product Price -->
+                                <div class="product-price fw-bold text-dark mb-3">
+                                    ₱{{ "{:,.2f}".format(product['min_price']) }}
+                                        </div>
+
+                                <!-- 3. Ratings and Stats -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="product-rating d-flex align-items-center">
+                                        <div class="stars text-dark me-2">
+                                            {% set rating = product['Average_Rating']|float %}
+                                            {% for _ in range(5) %}
+                                                <i class="bi bi-star{% if loop.index <= rating|round(0, 'floor') %}-fill{% endif %}"></i>
+                                            {% endfor %}
+                                        </div>
+                                        <span class="rating-text text-muted">{{ "{:.1f}".format(rating) }}</span>
+                                    </div>
+                                    <span class="text-muted small">{{ product.get('total_orders', 0) }} sold</span>
+                                    </div>
+                         
+                                <!-- 4. Action Buttons -->
+                                <div class="action-buttons mt-3">
+                                    <!-- Wishlist Button -->
+                                    <div class="d-flex gap-2 mb-2">
+                                        <form method="POST" action="{{ url_for('buyer_categories.toggle_like_product', product_info_id=product['product_info_id']) }}" class="w-100">
+                                            <button type="submit" class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2">
+                                                <i class="bi bi-heart{% if product.liked %}-fill{% endif %}"></i>
+                                                {% if product.liked %}
+                                                    Remove from Wishlist
+                                                {% else %}
+                                                    Add to Wishlist
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                    
+                                    <!-- Add to Cart Button -->
+                                    <a href="{{ url_for('buyer_product.product_page', product_info_id=product['product_info_id']) }}" 
+                                       class="btn btn-dark w-100 d-flex align-items-center justify-content-center gap-2"
+                                       style="background-color: #212529; border-color: #212529; color: #fff; transition: all 0.3s ease;">
+                                        <i class="bi bi-cart-plus"></i>
+                                        Add to Cart
+                                    </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="col-12">
+                            <div class="text-center py-5">
+                            <i class="bi bi-search fs-1 text-muted mb-3"></i>
+                            <h5 class="text-muted">No products found</h5>
+                            <p class="text-muted">Try adjusting your filters or search criteria</p>
+                        </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+            <nav aria-label="Products pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item {% if not has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('buyer_categories.category_page', category=category, page=prev_page) }}" tabindex="-1">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                                </li>
+                                {% for page_num in page_numbers %}
+                                    {% if page_num == '...' %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                                    {% else %}
+                                        <li class="page-item {% if page_num == page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('buyer_categories.category_page', category=category, page=page_num) }}">
+                                    {{ page_num }}
+                                </a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                <li class="page-item {% if not has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('buyer_categories.category_page', category=category, page=next_page) }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                                </li>
+                            </ul>
+                        </nav>
+            {% endif %}
+        </div>
+
+        <!-- Filter Sidebar (Right) -->
+        <div class="col-lg-3 order-1 order-lg-2 mb-4 mb-lg-0">
+            <div class="filter-dropdown">
+                <!-- Filter Toggle Button -->
+                <div class="filter-header mb-3" data-bs-toggle="collapse" data-bs-target="#filterPanel">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-funnel"></i>
+                        <span>Filters</span>
+                    </div>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+
+                <!-- Filter Content -->
+                <div class="collapse filter-content" id="filterPanel">
+                    <form method="get" action="{{ url_for('buyer_categories.category_page', category=category) }}">
+                        <!-- Price Range Section -->
+                        <div class="filter-section">
+                            <h6 class="mb-3">Price Range</h6>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <select name="min_price" class="form-select">
+                                        <option value="0">Min Price</option>
+                                        {% for price in [100, 500, 1000, 5000, 10000, 20000] %}
+                                            <option value="{{ price }}" {% if min_price == price %}selected{% endif %}>
+                                                ₱{{ "{:,.0f}".format(price) }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select name="max_price" class="form-select">
+                                        <option value="0">Max Price</option>
+                                        {% for price in [1000, 5000, 10000, 20000, 50000, 100000] %}
+                                            <option value="{{ price }}" {% if max_price == price %}selected{% endif %}>
+                                                ₱{{ "{:,.0f}".format(price) }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sort By Section -->
+                        <div class="filter-section">
+                            <h6 class="mb-3">Sort By</h6>
+                            <select name="sort" class="form-select">
+                                <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Most Recent</option>
+                                <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                            </select>
+                        </div>
+
+                        <!-- Popularity Section -->
+                        <div class="filter-section">
+                            <h6 class="mb-3">Popularity</h6>
+                            <select name="popularity" class="form-select">
+                                <option value="">All</option>
+                                <option value="top_selling" {% if popularity == 'top_selling' %}selected{% endif %}>Best Sellers</option>
+                                <option value="most_reviewed" {% if popularity == 'most_reviewed' %}selected{% endif %}>Most Reviewed</option>
+                                <option value="highest_rated" {% if popularity == 'highest_rated' %}selected{% endif %}>Highest Rated</option>
+                            </select>
+                        </div>
+
+                        <!-- Filter Buttons -->
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-dark">Apply Filters</button>
+                            <button type="submit" name="reset" value="1" class="btn btn-outline-dark">Reset Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Filter Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title"><i class="bi bi-funnel me-2"></i>Filters</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <!-- Mobile Filter Form (Same as desktop) -->
+        <form method="get" action="{{ url_for('buyer_categories.category_page', category=category) }}">
+            <!-- Price Range -->
+            <div class="mb-4">
+                <label class="form-label text-muted">Price Range</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <select name="min_price" class="form-select">
+                            <option value="0">Min Price</option>
+                            {% for price in [100, 500, 1000, 5000, 10000, 20000] %}
+                                <option value="{{ price }}" {% if min_price == price %}selected{% endif %}>
+                                    ₱{{ "{:,.0f}".format(price) }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select name="max_price" class="form-select">
+                            <option value="0">Max Price</option>
+                            {% for price in [1000, 5000, 10000, 20000, 50000, 100000] %}
+                                <option value="{{ price }}" {% if max_price == price %}selected{% endif %}>
+                                    ₱{{ "{:,.0f}".format(price) }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sort By -->
+            <div class="mb-4">
+                <label class="form-label text-muted">Sort By</label>
+                <select name="sort" class="form-select">
+                    <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Most Recent</option>
+                    <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                </select>
+            </div>
+
+            <!-- Popularity -->
+            <div class="mb-4">
+                <label class="form-label text-muted">Popularity</label>
+                <select name="popularity" class="form-select">
+                    <option value="">All</option>
+                    <option value="top_selling" {% if popularity == 'top_selling' %}selected{% endif %}>Best Sellers</option>
+                    <option value="most_reviewed" {% if popularity == 'most_reviewed' %}selected{% endif %}>Most Reviewed</option>
+                    <option value="highest_rated" {% if popularity == 'highest_rated' %}selected{% endif %}>Highest Rated</option>
+                </select>
+        </div>
+
+            <!-- Filter Buttons -->
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-dark">Apply Filters</button>
+                <button type="submit" name="reset" value="1" class="btn btn-outline-dark">Reset Filters</button>
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="offcanvas">Close</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

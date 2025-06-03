@@ -1,0 +1,350 @@
+{% extends "buyer_homepage.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<style>
+.notifications-container {
+    padding: 2rem;
+}
+
+.notification-card {
+    border: none;
+    border-radius: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+.notification-item {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.notification-item.unread {
+    background-color: rgba(33, 37, 41, 0.03);
+}
+
+.notification-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.5rem;
+}
+
+.notification-icon i {
+    font-size: 1.5rem;
+}
+
+.notification-content {
+    flex: 1;
+    word-wrap: break-word;
+    color: #6c757d;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.notification-time {
+    font-size: 0.875rem;
+    color: #adb5bd;
+    min-width: 140px;
+    text-align: right;
+}
+
+.btn-dark {
+    background: #212529;
+    border-color: #212529;
+    padding: 0.625rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.btn-dark:hover {
+    background: #1a1e21;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    min-width: 180px;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1.25rem;
+}
+
+.dropdown-item.active {
+    background-color: #212529;
+    color: #fff;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.card-body {
+    padding: 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.card-footer {
+    padding: 1.25rem 2rem;
+    background: #fff;
+    border-top: 1px solid #eee;
+}
+
+.pagination {
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pagination .page-link {
+    border: none;
+    padding: 0.5rem 1rem;
+    color: #212529;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #212529;
+    color: #fff;
+}
+
+.pagination .page-link:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.empty-state {
+    padding: 6rem 2rem;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 5rem;
+    color: #dee2e6;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb {
+    margin-bottom: 1.5rem;
+}
+
+.notification-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+@media (max-width: 768px) {
+    .notifications-container {
+        padding: 1rem;
+    }
+
+    .notification-item {
+        padding: 1.25rem 1rem;
+    }
+
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 1rem;
+    }
+
+    .notification-icon i {
+        font-size: 1.25rem;
+    }
+
+    .notification-time {
+        min-width: auto;
+        margin-top: 0.5rem;
+    }
+
+    .card-header {
+        padding: 1.25rem 1rem;
+    }
+
+    .card-footer {
+        padding: 1rem;
+    }
+}
+</style>
+
+<div class="notifications-container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('buyer_homepage.show_buyer_homepage')}}" class="text-dark">Home</a></li>
+            <li class="breadcrumb-item active">Notifications</li>
+        </ol>
+    </nav>
+
+    <div class="notification-card card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-bell me-2"></i>Notifications
+                </h5>
+                {% if notifications %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-sort-down me-2"></i>Sort By
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item {% if sort_by == 'recent' %}active{% endif %}" 
+                              href="{{ url_for('buyer_notifications.notifications', sort_by='recent', page=1) }}">
+                            <i class="bi bi-clock me-2"></i>Most Recent
+                        </a></li>
+                        <li><a class="dropdown-item {% if sort_by == 'oldest' %}active{% endif %}" 
+                              href="{{ url_for('buyer_notifications.notifications', sort_by='oldest', page=1) }}">
+                            <i class="bi bi-clock-history me-2"></i>Oldest
+                        </a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-body">
+            {% if notifications %}
+                {% for notification in notifications %}
+                <div class="notification-item {% if notification.status == 'Unread' %}unread{% endif %}">
+                    <div class="d-flex align-items-start">
+                        <!-- Notification Icon -->
+                        <div class="notification-icon 
+                            {% if notification.notification_type == 'Order Status' %}bg-dark text-white
+                            {% elif notification.notification_type == 'Order Received' %}bg-success text-white
+                            {% elif notification.notification_type == 'Payment' %}bg-warning text-dark
+                            {% elif notification.notification_type == 'Delivery' %}bg-dark text-white
+                            {% elif notification.notification_type == 'Promotion' %}bg-danger text-white
+                            {% elif notification.notification_type == 'Commission Received' %}bg-success text-white
+                            {% elif notification.notification_type == 'Sales Added' %}bg-dark text-white
+                            {% elif notification.notification_type == 'New Review' %}bg-warning text-dark
+                            {% else %}bg-secondary text-white{% endif %}">
+                            {% if notification.notification_type == 'Order Status' %}
+                                <i class="bi bi-clipboard-check"></i>
+                            {% elif notification.notification_type == 'Order Received' %}
+                                <i class="bi bi-inbox"></i>
+                            {% elif notification.notification_type == 'Payment' %}
+                                <i class="bi bi-currency-dollar"></i>
+                            {% elif notification.notification_type == 'Delivery' %}
+                                <i class="bi bi-truck"></i>
+                            {% elif notification.notification_type == 'Promotion' %}
+                                <i class="bi bi-megaphone"></i>
+                            {% elif notification.notification_type == 'Commission Received' %}
+                                <i class="bi bi-piggy-bank"></i>
+                            {% elif notification.notification_type == 'Sales Added' %}
+                                <i class="bi bi-graph-up"></i>
+                            {% elif notification.notification_type == 'New Review' %}
+                                <i class="bi bi-star"></i>
+                            {% else %}
+                                <i class="bi bi-bell"></i>
+                            {% endif %}
+                        </div>
+
+                        <!-- Notification Content -->
+                        <div class="notification-content">
+                            <h6 class="notification-title">{{ notification.notification_title }}</h6>
+                            <p class="mb-0">
+                                {{ notification.content | replace('\n', '<br>') | safe }}
+                            </p>
+                        </div>
+
+                        <span class="notification-time">
+                            {{ notification.created_at.strftime('%d %b %Y, %H:%M') }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-bell-slash"></i>
+                    <h4>No Notifications Yet</h4>
+                    <p class="text-muted mb-4">We'll notify you when something important happens!</p>
+                    <a href="{{ url_for('buyer_homepage.show_buyer_homepage') }}" class="btn btn-dark">
+                        <i class="bi bi-house me-2"></i>Back to Home
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if total_pages > 1 %}
+        <div class="card-footer">
+            <nav aria-label="Notifications pagination">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Page -->
+                    {% if current_page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('buyer_notifications.notifications', sort_by=sort_by, page=current_page-1) }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Page Numbers -->
+                    {% for page_num in range(1, total_pages + 1) %}
+                        {% if page_num == current_page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% elif page_num <= current_page + 2 and page_num >= current_page - 2 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('buyer_notifications.notifications', sort_by=sort_by, page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% elif page_num == 1 or page_num == total_pages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('buyer_notifications.notifications', sort_by=sort_by, page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                        {% elif page_num == current_page - 3 or page_num == current_page + 3 %}
+                            <li class="page-item disabled">
+                                <span class="page-link">•••</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Next Page -->
+                    {% if current_page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('buyer_notifications.notifications', sort_by=sort_by, page=current_page+1) }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- Pagination Info -->
+            <div class="text-center">
+                <small class="text-muted">
+                    Showing {{ ((current_page - 1) * 10) + 1 }} to {{ [current_page * 10, total_notifications] | min }} of {{ total_notifications }} notifications
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
